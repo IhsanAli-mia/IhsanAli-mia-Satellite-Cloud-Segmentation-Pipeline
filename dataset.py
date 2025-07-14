@@ -225,3 +225,6 @@ dataset = CloudBalancedDatasetWithSynthesis(
     samples_per_bin=500,
     patch_size=384
 )
+
+# Save the dataset to a file
+torch.save(dataset,'dataset.pt')

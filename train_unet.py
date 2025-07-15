@@ -52,8 +52,9 @@ def train_model(model, train_loader, val_loader, early_stopper, best_model_path,
         train_loss = 0
         train_correct = 0
         train_total = 0
-        for images, masks in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} - Training"):
-            images, masks = images.to(device), masks.to(device)
+        for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} - Training"):
+            images = batch["pixel_values"].to(device)
+            masks = batch["mask"].to(device)
 
             preds = model(images)
             loss = criterion(preds, masks)

@@ -2,19 +2,30 @@ import numpy as np
 from pathlib import Path
 from PIL import Image
 import torch
+import torch.nn.functional as F
 from unet import UNet 
 
-def load_image(image_path):
+def load_image(image_path, target_size=(384, 384)):
     """Load and preprocess an image."""
     try:
         with Image.open(image_path) as img:
-            # Convert to RGB if image has alpha channel
+            # Convert to RGB if needed
             if img.mode != 'RGB':
                 img = img.convert('RGB')
-            img_arr = np.array(img).astype(np.uint8)
-            # Normalize to [0, 1] and add batch dimension
-            img_tensor = torch.from_numpy(img_arr).float().permute(2, 0, 1).unsqueeze(0) / 255.0
+            
+            # Convert to tensor (C, H, W) and normalize [0, 1]
+            img_tensor = torch.from_numpy(np.array(img)).float().permute(2, 0, 1).unsqueeze(0) / 255.0
+            
+            # Resize using F.interpolate (BILINEAR for images, like in training)
+            img_tensor = F.interpolate(
+                img_tensor,
+                size=target_size,
+                mode='bilinear',
+                align_corners=False  # Must match training!
+            )
+            
             return img_tensor
+            
     except FileNotFoundError:
         print(f"Error: File not found at {image_path}")
         return None
